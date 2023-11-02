@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" charset="utf-8"/>
+	<link rel="stylesheet" href="css/shop.css" type="text/css" charset="utf-8"/>
+	<link rel="stylesheet" href="css/playerClassMenu.css" type="text/css" charset="utf-8"/>
+	<link rel="stylesheet" href="css/toolTip.css" type="text/css" charset="utf-8"/>
+	<link rel="stylesheet" href="css/abilities.css" type="text/css" charset="utf-8"/>
+	<link rel="stylesheet" href="css/dragablewindow.css" type="text/css" charset="utf-8"/>
+	<meta charset="utf-8">
+	<meta http-equiv="content_security_policy" content="script-src 'self'; script-src-elem 'self'">
+	<title>Boss Fight</title>
+</head>
+<body class="wallpaper">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script> <!-- allow jquery -->
+	<!-- Login controls -->
+	<div class="login-group">
+		<label class="grid-col1-grid-row1">User name: </label>
+		<label class="grid-col1-grid-row2">Password: </label>
+		<input id="inputUserName" type="text" autocomplete="username" required/>
+		<input id="inputPassword" type="password" autocomplete="current-password" required/>
+		<button id="signInButton" type="button" class="btn-primary grid-col1/3-grid-row3">
+			Sign in
+		</button>
+	</div>
+	<!-- Title -->
+	<h1 class="title">
+		Boss Fight
+	</h1>
+	<div class="flex">
+		<!-- Canvas/Left column -->
+		<column class="left-column">
+			<div class="inner-column">
+				<button id="voteMonsterTierDownButton" type="button" class="btn-primary">
+					<img src="./images/ui_icons/red_arrow_down.png" class="vote-button">
+					Difficulty down
+				</button>
+				<button id="voteMonsterTierUpButton" type="button" class="btn-primary">
+					<img src="./images/ui_icons/green_arrow_up.png" class="vote-button">
+					Difficulty up
+				</button>
+			</div>
+			<canvas id="mainCanvas"></canvas>
+		</column>
+		<!-- Main menu/centre column -->
+		<column class="centre-column">
+			<div class="inner-column">
+				<!-- Player info column -->
+				<div style="grid-column: 1; grid-row: 1;">
+					<label>User: </label>
+					<label id="player_name">Player name</label>
+				</div>
+				<div style="grid-column: 1; grid-row: 2;">
+					<img id="playerSprite" src="./images/sprites/player_classes/peasant_m.png" alt="Player class sprite" width="150" height="150" style="object-fit: fill;">
+				</div>
+				<div style="grid-column: 1; grid-row: 3;">
+					<label class="hp-mana-label">HP: </label>
+					<progress id="progress_player_health" value="0" max="100"></progress>
+					<label id="player_hp"></label>
+				</div>
+				<div style="grid-column: 1; grid-row: 4;">
+					<label class="hp-mana-label">Mana: </label>
+					<progress class="mana-progress" id="progress_player_mana" value="0" max="100"></progress>
+					<label id="player_mana"></label>
+				</div>
+				<div style="grid-column: 1; grid-row: 5;">
+					<label>Level: </label>
+					<label id="player_level_and_class"></label>
+				</div>
+				<div style="grid-column: 1; grid-row: 6;">
+					<label>XP: </label>
+					<label id="player_xp"></label>
+					<label id="player_xp_to_next_level"></label>
+				</div>
+				<div style="grid-column: 1; grid-row: 7;">
+					<label>Gold: </label>
+					<label id="player_gold"></label>
+				</div>
+				<div style="grid-column: 1; grid-row: 8;">
+					<label>Equipped weapon: </label>
+					<label id="player_equipped_weapon_name"></label>
+				</div>
+				<div style="grid-column: 1; grid-row: 9;">
+					<button type="button" class="btn-primary" onclick="LoginTestUser()">
+						Login "Test User"
+					</button>
+					<button type="button" class="btn-primary" onclick="LoginTestUser2()">
+						Login "Test User2"
+					</button>
+				</div>
+				<div style="grid-column: 1; grid-row: 10;">
+					<button type="button" class="btn-primary" onclick="AttackMonster()">
+						<img src="./images/ui_icons/attack_sword.png" class="max-size-100-percent">
+						Attack Monster
+					</button>
+				</div>
+				<abilities id="player_abilities_list" class="abilities-list" style="grid-column: 1; width: 300px;">
+					<!-- Abilities goes here -->
+				</abilities>
+				<!-- Player inventory/classes -->
+				<div style="grid-column: 2; grid-row: 1/20;">
+					<select id="player_inventory" size="1" style="flex-grow:1; float:left; width: 100%;"></select>
+					<button id="openShopButton" type="button" class="btn-primary" style="flex-grow:1; float:left; margin-top: 5px;">Open shop</button>
+					<button id="openUnlockedClassesButton" type="button" class="btn-primary" style="flex-grow:1; float:left; margin-top: 5px;">Change Class</button>
+				</div>
+			</div>
+		</column>
+		<!-- Right column -->
+		<column class="right-column">
+			<div class="inner-column">
+				<!-- logs -->
+				<div style="grid-column: 1/-1; grid-row: 1;">
+					<label onclick="OpenLog(event, 'text_log');">
+					  <div id="text_log_hover" class="log-tab hover-light-grey border-red">General</div>
+					</label>
+					<label onclick="OpenLog(event, 'combat_log');">
+					  <div id="combat_log_hover" class="log-tab hover-light-grey">Combat</div>
+					</label>
+					<label onclick="OpenLog(event, 'chat_log');">
+					  <div id="chat_log_hover" class="log-tab hover-light-grey">Chat</div>
+					</label>
+				  </div>
+				<textarea id="text_log" class="log" placeholder="General log..." readonly=true style="grid-column: 1/-1; grid-row: 2;"></textarea>
+				<textarea id="combat_log" class="log" placeholder="Combat log..." readonly=true style="grid-column: 1/-1; grid-row: 2; display: none;"></textarea>
+				<textarea id="chat_log" class="log" placeholder="Chat log..." readonly=true style="grid-column: 1/-1; grid-row: 2; display: none;"></textarea>
+				<button id="sendChatMessageButton" type="button" class="btn-primary" style="grid-column: 1">Send</button>
+				<input id="chatMessageContentInput" type="text" style="grid-column: 2/-1" ></input>
+				<div style="grid-column: 1/-1;">
+					<div style="background-color: var(--wallpaper-background-colour); width: 30px; height: 30px; float: left; border: solid; color: white; border-width: 1px;"></div>
+					<div style="background-color: var(--border-colour); width: 30px; height: 30px; float: left; border: solid; color: white; border-width: 1px;"></div>
+					<div style="background-color: var(--shadow-colour); width: 30px; height: 30px; float: left; border: solid; color: white; border-width: 1px;"></div>
+					<div style="background-color: var(--text-background-colour); width: 30px; height: 30px; float: left; border: solid; color: white; border-width: 1px;"></div>
+					<div style="background-color: var(--default-font-colour); width: 30px; height: 30px; float: left; border: solid; color: white; border-width: 1px;"></div>
+				</div>
+			</div>
+		</column>
+	</div>
+	<label style="float: left;">
+		UI icons provided by
+		<a href="https://cheekyinkling.itch.io/shikashis-fantasy-icons-pack">shikashi</a>
+	</label>
+	<label style="float:right;">
+		Monster and player sprites by
+		<a href="https://www.wesnoth.org/">The Battle for Wesnoth</a>
+	</label>
+</body>
+</html>
+
+<!-- Inventory context menu -->
+<ul class='custom-menu context-menu'>
+	<li id=custom_menu_equip data-action = "equip" data-equip_id=none>Equip weapon</li>
+	<li id=custom_menu_sell data-action = "sell" data-sell_id=none>Sell weapon</li>
+</ul>
+
+<!-- alerts dialog -->
+<ul class="custom-alert custom-menu center-browser-div">
+	<img id="custom-alert-text-icon" src="./images/ui_icons/alert_menu/default.png">
+	<label id="custom-alert-text-label"></label>
+</ul>
+
+<!-- shop dialog -->
+<div id="dialogBackground" class="shop-background"></div>
+<div id="shopDialog" class="modal-dialog-generic shop-dialog">
+	<form method="dialog">
+		<div class="shop-column-divider">
+			<!-- weapons -->
+			<div class="column" style="float:left; padding-left: 5px; flex-grow:1; flex-shrink: 0; border: solid; color: var(--border-colour); margin-left: 5px; margin-right: 5px; flex: 50%;">
+				<div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(1080, auto); gap: 10px; color: var(--default-font-colour); padding-top: 15px;">
+					<label style="grid-column: 1; grid-row: 1; text-align: center;  font-size: xx-large;">Weapons</label>
+					<div id="testWeaponContainer1" style="grid-column: 1; grid-row: 2;">
+						<button class="buy-button btn-primary" id="test1">Buy</button>
+						<label class="buy-label">Weapon 1</label>
+					</div>
+					<div id="testWeaponContainer2" style="grid-column: 1; grid-row: 3;">
+						<button  class="buy-button btn-primary">Buy</button>
+						<label class="buy-label">Weapon 2</label>
+					</div>
+				</div>
+			</div>
+			<!-- classes -->
+			<div class="column" style="float:right; padding-right: 5px; flex-grow:1; flex-shrink: 0; border: solid; color: var(--border-colour); margin-left: 5px; margin-right: 5px; flex: 50%;">
+				<div style="display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(1080, auto); gap: 10px; color: var(--default-font-colour); padding-top: 15px;">
+					<label style="grid-column: 1; grid-row: 1; text-align: center; font-size: xx-large;">Classes</label>
+					<div id="playerclass_buy_options" style="grid-column: 1; grid-row: 2;"></div>
+				</div>
+			</div>
+		</div>
+		<menu style="position: sticky; bottom: 0px;">
+			<label id="shop_gold_amount_label" style="right:300px; float: right; position: sticky;"></label>
+			<button id="closeShopButton" value="default" class="btn-primary btn-shop">Close shop</button>
+		</menu>
+	</form>
+</div>
+
+<!-- PlayerClass dialog -->
+<div id="playerClassMenu" class="modal-dialog-generic player-Class-dialog">
+	<form method="dialog">
+		<div class="player-class-column-divider">
+			<!-- current player class -->
+			<div class="column player-class-selector-left-pane-column">
+				<div class="player-class-selector-left-pane-container">
+					<label id="playerClassSelectorLeftPaneTitle" class="playerClassSelectorLeftPaneTitle" style="grid-column: 1/-1; grid-row: 1;">Current Class name</label>
+					<img id="playerClassSelectorLeftPaneSprite" class="player-class-selector-left-pane-sprite" width="250" height="250" style="object-fit: fill; grid-column: 1/-1; grid-row: 2;">
+					<div class="masculin-feminine-slider" style="grid-column: 1/-1; grid-row: 3;">
+						<p class="masculine-feminine-slider-symbol">masculine ♂️</p>
+						<label class="switch" style="float: left;">
+							<input type="checkbox" id="playerClassMenuMasculineFeminineSliderCheckbox" style="float: left;">
+							<span class="slider round" style="float: left;"></span>
+						</label>
+						<p class="masculine-feminine-slider-symbol">feminine ♀️</p>
+					</div>
+					<label id="playerClassMenuDescription" style="grid-area: 4/1/4/-1;">Description</label>
+
+					<label class="player-class-section-title" style="grid-area: 5/1/5/-1;">Requirements</label>
+					<label id="playerClassMenuRequiredClasses" style="grid-area: 6/1/6/3;">Class requirements:</label>
+					<label id="playerClassMenuGoldCost" style="grid-area: 6/3/6/3;">Shop gold cost:</label>
+
+					<label class="player-class-section-title" style="grid-area: 7/1/7/-1;">Basics</label>
+					<label id="playerClassMenuCurrentLevel" style="grid-area: 8/1/8/1;">Current level:</label>
+					<label id="playerClassMenuAttackPowerBonus" style="grid-area: 8/2/8/2;">Attack power bonus: +</label>
+					<label id="playerClassMenuCritChance" style="grid-area: 8/3/8/3;">Base critical chance:</label>
+					<label id="playerClassMenuMaxHealthPoints" style="grid-area: 9/1/9/1;">Max health points:</label>
+					<label id="playerClassMenuHealthPointsGainedPerLevel" style="grid-area: 9/2/9/2;">Health points per level:</label>
+					<label id="playerClassMenuMaxManaPoints" style="grid-area: 10/1/10/1;">max mana points:</label>
+					<label id="playerClassMenuManaPointsGainedPerLevel" style="grid-area: 10/2/10/2;">Mana points per level:</label>
+
+					<label id="PlayerClassMenuAbilities" class="player-class-section-title" style="grid-area: 11/1/11/1;">
+						Abilities
+						<br>
+						<abilities id="PlayerClassMenuAbilitiesList" class="abilities-list">
+							<!-- Abilities goes here -->
+						</abilities>
+					</label>
+
+					<label class="player-class-section-title" style="grid-area: 13/1/13/-1;">Statistics</label>
+					<label style="grid-area: 14/1/14/1;">Unlocked date:</label>
+					<label style="grid-area: 15/1/15/1;">Total damage dealt with class:</label>
+					<label style="grid-area: 15/2/15/2;">Monster kills:</label>
+					<label style="grid-area: 15/3/15/3;">Monster killing blows:</label>
+
+					<button style="grid-area: 16/2/16/2;" id="setToCurrentClassPlayerClassMenuButton" class="btn-primary">Set to current class</button>
+				</div>
+			</div>
+			<!-- list of unlocked classes -->
+			<div class="column player-class-selector-right-pane-column">
+				<div style="display: grid; grid-template-columns: 1fr; grid-auto-rows: minmax(1080, auto); gap: 10px; color: var(--default-font-colour); padding-top: 15px;">
+					<label style="text-align: center; font-size: xx-large;">Classes</label>
+					<div id="unlockedPlayerClasses"></div>
+				</div>
+			</div>
+		</div>
+		<menu style="bottom: 0px;">
+			<button id="closeplayerClassMenuButton" value="default" class="btn-primary">Close</button>
+		</menu>
+	</form>
+</div>
+
+<div hidden id="otherPlayersWindow" class="window">
+	<div class="window-top">
+	</div>
+		<div class="window-content">
+	</div>
+</div>
+
+<img id="monsterSprite" src="./images/sprites/monsters/goblin.png" alt="Current monster sprite" class="hidden">
+
+<!-- not to self... the order of these scripts matter -->
+<script type="text/javascript" src="scripts/sprites.js"></script>
+<script type="text/javascript" src="scripts/formatter.js"></script>
+<script type="text/javascript" src="scripts/model.js"></script>
+<script type="text/javascript" src="scripts/chat.js"></script>
+<script type="text/javascript" src="scripts/updateUI.js" id="updateUIScript"></script>
+<script type="text/javascript" src="scripts/socketCommunication.js"></script>
+<script type="text/javascript" src="scripts/cf.js"></script>
+<script type="text/javascript" src="scripts/canvas.js"></script>
+<script type="text/javascript" src="scripts/custom_context_menu.js"></script>
+<script type="text/javascript" src="scripts/custom_alert.js"></script>
+<script type="text/javascript" src="scripts/shop_dialog.js"></script>
+<script type="text/javascript" src="scripts/playerClasses.js"></script>
+<script type="text/javascript" src="scripts/sign_in.js"></script>
+<script type="text/javascript" src="scripts/keyboard_listener_functions.js"></script>
+<script type="text/javascript" src="scripts/ability.js"></script>
+<script type="text/javascript" src="scripts/other_players_window.js"></script>

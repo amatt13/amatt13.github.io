@@ -1,20 +1,8 @@
 let socket = undefined;
 let conn_string = "";
 
-if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-	conn_string = "ws://localhost:5000/ws";
-	console.log("localhost");
-}
-else {
-	console.log("remote host");
-	conn_string = "wss://185.126.108.184:5000/ws";
-}
-
-
-
-
+conn_string = "wss://185.126.108.184:5000/ws";
 socket = new WebSocket(conn_string);
-
 socket.onopen = function (e) {
 	LogToGeneralLog("[open] Connection established");
 	FetchMostRecentMessages();
